@@ -1,0 +1,51 @@
+---
+// Visual breadcrumbs. JSON-LD for the same data is emitted by SEO.astro.
+
+interface Props {
+  trail: { label: string; href: string }[];
+}
+
+const { trail } = Astro.props;
+---
+
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <ol>
+    {
+      trail.map((crumb, i) => (
+        <li>
+          {i === trail.length - 1 ? (
+            <span aria-current="page">{crumb.label}</span>
+          ) : (
+            <a href={crumb.href}>{crumb.label}</a>
+          )}
+        </li>
+      ))
+    }
+  </ol>
+</nav>
+
+<style>
+  .breadcrumbs ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    font-size: 0.875rem;
+    color: var(--c-muted);
+  }
+  .breadcrumbs li + li::before {
+    content: '/';
+    margin-right: 0.4rem;
+    color: var(--c-rule);
+  }
+  .breadcrumbs a {
+    color: var(--c-muted);
+    text-decoration: none;
+  }
+  .breadcrumbs a:hover {
+    color: var(--c-ink);
+    text-decoration: underline;
+  }
+</style>

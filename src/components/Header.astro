@@ -1,0 +1,77 @@
+---
+import { SITE_TITLE } from '../consts';
+
+const path = Astro.url.pathname;
+const isActive = (href: string) =>
+  href === '/' ? path === '/' : path.startsWith(href);
+---
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="/" class="brand" aria-label="Home">
+      <span>{SITE_TITLE}</span>
+    </a>
+    <nav aria-label="Primary">
+      <a href="/" class:list={[{ active: isActive('/') }]}>Home</a>
+      <a href="/blog" class:list={[{ active: isActive('/blog') }]}>Writing</a>
+      <a href="/about" class:list={[{ active: isActive('/about') }]}>About</a>
+      <a href="/contact" class:list={[{ active: isActive('/contact') }]}>Contact</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: color-mix(in srgb, var(--c-bg) 92%, transparent);
+    backdrop-filter: saturate(140%) blur(6px);
+    border-bottom: 1px solid var(--c-rule);
+  }
+  .wrap {
+    max-width: var(--measure-wide);
+    margin: 0 auto;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .brand {
+    font-family: var(--font-serif);
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--c-ink);
+    text-decoration: none;
+    letter-spacing: 0.01em;
+  }
+  nav {
+    display: flex;
+    gap: 1.25rem;
+    font-size: 0.95rem;
+  }
+  nav a {
+    color: var(--c-muted);
+    text-decoration: none;
+  }
+  nav a:hover {
+    color: var(--c-ink);
+  }
+  nav a.active {
+    color: var(--c-ink);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 1px;
+  }
+  @media (max-width: 600px) {
+    .wrap {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    nav {
+      gap: 1rem;
+    }
+  }
+</style>

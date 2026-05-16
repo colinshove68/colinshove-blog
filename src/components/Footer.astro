@@ -1,0 +1,49 @@
+---
+import { SITE_TITLE } from '../consts';
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p class="colophon">
+      Written and built by {SITE_TITLE}. Static. No tracking. No newsletter popups.
+    </p>
+    <p class="meta">
+      &copy; {year} {SITE_TITLE} ·
+      <a href="/rss.xml">RSS</a> ·
+      <a href="/about">About</a>
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--c-rule);
+    margin-top: 6rem;
+    padding: 2rem 0 3rem;
+    background: var(--c-bg);
+  }
+  .wrap {
+    max-width: var(--measure-wide);
+    margin: 0 auto;
+    padding: 0 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--c-muted);
+  }
+  .colophon {
+    font-style: italic;
+    margin: 0;
+  }
+  .meta {
+    margin: 0;
+  }
+  .meta a {
+    color: var(--c-muted);
+  }
+  .meta a:hover {
+    color: var(--c-ink);
+  }
+</style>

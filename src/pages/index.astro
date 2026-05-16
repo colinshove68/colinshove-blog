@@ -1,0 +1,101 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf())
+  .slice(0, 6);
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+---
+
+<Base title={SITE_TITLE} description={SITE_DESCRIPTION}>
+  <section class="measure intro">
+    <h1>Colin Shove</h1>
+    <p class="lede">
+      Web designer and developer. I run <a href="https://frively.com">Frively</a>,
+      building high-performance sites for local businesses. This is where I write
+      about the craft, the industry, and the occasional tangent.
+    </p>
+    <p>
+      <a href="/blog">Read the writing</a> ·
+      <a href="/about">About me</a> ·
+      <a href="/contact">Get in touch</a>
+    </p>
+  </section>
+
+  <section class="measure">
+    <h2>Recent writing</h2>
+    {
+      posts.length === 0 ? (
+        <p class="empty">First post is on the way. Check back soon.</p>
+      ) : (
+        <ul class="post-list">
+          {posts.map((post) => (
+            <li>
+              <article>
+                <h3>
+                  <a href={`/blog/${post.data.slug}/`}>{post.data.title}</a>
+                </h3>
+                <p class="meta">
+                  <time datetime={post.data.publishDate.toISOString()}>
+                    {fmt(post.data.publishDate)}
+                  </time>
+                </p>
+                <p>{post.data.metaDescription}</p>
+              </article>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </section>
+</Base>
+
+<style>
+  .intro {
+    padding: 1rem 1.25rem 2rem;
+  }
+  .intro h1 {
+    margin-bottom: 1rem;
+  }
+  .lede {
+    font-size: 1.1875rem;
+    line-height: 1.6;
+    color: var(--c-ink);
+  }
+  .post-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .post-list li {
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--c-rule);
+  }
+  .post-list li:last-child {
+    border-bottom: 0;
+  }
+  .post-list h3 {
+    margin: 0 0 0.25rem;
+    font-size: 1.25rem;
+  }
+  .post-list h3 a {
+    text-decoration: none;
+  }
+  .post-list h3 a:hover {
+    text-decoration: underline;
+  }
+  .meta {
+    color: var(--c-muted);
+    font-size: 0.875rem;
+    font-style: italic;
+    margin: 0 0 0.5rem;
+  }
+  .empty {
+    color: var(--c-muted);
+    font-style: italic;
+  }
+</style>

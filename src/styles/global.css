@@ -1,0 +1,181 @@
+/* ----------------------------------------------------------------
+   Editorial-minimalist style system for colinshove.com
+   Serif body. Generous whitespace. Zero web fonts (uses system
+   serif stack so first paint is instant, which keeps Lighthouse
+   Performance at 100 by default).
+   ---------------------------------------------------------------- */
+
+:root {
+  /* Palette: warm paper, deep ink, one accent */
+  --c-bg: #fafaf7;
+  --c-bg-alt: #f4f2eb;
+  --c-ink: #1a1a1a;
+  --c-muted: #6b6b6b;
+  --c-rule: #e6e3da;
+  --c-accent: #8a4a1f; /* warm ochre, used sparingly */
+
+  /* Type */
+  --font-serif:
+    'Iowan Old Style', 'Palatino Linotype', Palatino, 'URW Palladio L',
+    P052, 'Source Serif Pro', Georgia, serif;
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+  --font-mono:
+    'SF Mono', 'JetBrains Mono', Menlo, Monaco, Consolas, monospace;
+
+  /* Measure (how wide a column of text gets before wrapping) */
+  --measure: 64ch;
+  --measure-wide: 72rem;
+
+  /* Scale */
+  --leading-body: 1.7;
+  --leading-tight: 1.25;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-bg: #14130f;
+    --c-bg-alt: #1c1b16;
+    --c-ink: #ece9e1;
+    --c-muted: #9b978c;
+    --c-rule: #2a2823;
+    --c-accent: #d59462;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--c-bg);
+  color: var(--c-ink);
+  font-family: var(--font-serif);
+  font-size: 1.0625rem;
+  line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Typography */
+h1, h2, h3, h4 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+  color: var(--c-ink);
+  margin: 2.5rem 0 1rem;
+  letter-spacing: -0.005em;
+}
+h1 {
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  margin-top: 0;
+}
+h2 {
+  font-size: clamp(1.5rem, 2.6vw, 1.875rem);
+}
+h3 {
+  font-size: 1.25rem;
+}
+
+p {
+  margin: 0 0 1.25rem;
+}
+
+a {
+  color: var(--c-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--c-rule);
+  transition: text-decoration-color 120ms ease;
+}
+a:hover {
+  text-decoration-color: var(--c-accent);
+}
+
+blockquote {
+  margin: 2rem 0;
+  padding: 0.25rem 0 0.25rem 1.25rem;
+  border-left: 2px solid var(--c-accent);
+  font-style: italic;
+  color: var(--c-muted);
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--c-rule);
+  margin: 3rem auto;
+  width: 6rem;
+}
+
+img, video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--c-bg-alt);
+  padding: 0.15em 0.35em;
+  border-radius: 3px;
+}
+
+pre {
+  font-family: var(--font-mono);
+  background: var(--c-bg-alt);
+  padding: 1rem 1.25rem;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+pre code {
+  background: none;
+  padding: 0;
+}
+
+/* Layout helpers */
+.measure {
+  max-width: var(--measure);
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 1.25rem;
+}
+.measure-wide {
+  max-width: var(--measure-wide);
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 1.25rem;
+}
+
+main {
+  padding: 3rem 0 2rem;
+}
+
+/* Accessibility */
+:focus-visible {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

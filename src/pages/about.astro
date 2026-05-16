@@ -1,0 +1,50 @@
+---
+import Base from '../layouts/Base.astro';
+
+const trail = [
+  { label: 'Home', href: '/' },
+  { label: 'About', href: '/about' },
+];
+---
+
+<Base
+  title="About"
+  description="Colin Shove is a web designer and developer running Frively, building high-performance sites for local businesses across the UK."
+  breadcrumbs={trail}
+>
+  <article class="measure">
+    <h1>About</h1>
+
+    <p>
+      I am Colin Shove, a web designer and developer based in the UK. I run
+      <a href="https://frively.com">Frively</a>, where I build websites for
+      local businesses to a hardcoded performance standard I call The
+      Visibility Spec.
+    </p>
+
+    <p>
+      The Spec exists because lots of small businesses get sold underperforming
+      websites by providers who knew better but cut corners. Clients could not
+      tell the difference, so corners stayed cut. I treat technical performance
+      and structured site architecture as non-negotiable standards, the same way
+      global brands do, and apply them on every page of every site I build.
+    </p>
+
+    <h2>What I write about here</h2>
+
+    <p>
+      This site is for the thinking that does not fit on the Frively site:
+      longer essays on web performance and dev craft, commentary on the local
+      web industry, tutorials when something is worth explaining properly, and
+      personal essays when the topic strays off-piste.
+    </p>
+
+    <h2>Where to find me</h2>
+
+    <p>
+      The best way to reach me is via the <a href="/contact">contact page</a>.
+      I read everything that comes through it. For Frively work, the
+      <a href="https://frively.com">main site</a> is the front door.
+    </p>
+  </article>
+</Base>

@@ -1,0 +1,93 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf());
+
+const trail = [
+  { label: 'Home', href: '/' },
+  { label: 'Writing', href: '/blog' },
+];
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+---
+
+<Base
+  title="Writing"
+  description="Essays and articles by Colin Shove on web performance, dev craft, industry commentary, and the occasional tangent."
+  breadcrumbs={trail}
+>
+  <section class="measure">
+    <h1>Writing</h1>
+    <p class="lede">
+      Everything I have published, newest first.
+    </p>
+
+    {
+      posts.length === 0 ? (
+        <p class="empty">First post is on the way. Check back soon.</p>
+      ) : (
+        <ul class="post-list">
+          {posts.map((post) => (
+            <li>
+              <article>
+                <h2>
+                  <a href={`/blog/${post.data.slug}/`}>{post.data.title}</a>
+                </h2>
+                <p class="meta">
+                  <time datetime={post.data.publishDate.toISOString()}>
+                    {fmt(post.data.publishDate)}
+                  </time>
+                  {post.data.category && <> · {post.data.category}</>}
+                </p>
+                <p>{post.data.metaDescription}</p>
+              </article>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </section>
+</Base>
+
+<style>
+  .lede {
+    font-style: italic;
+    color: var(--c-muted);
+    margin-bottom: 2rem;
+  }
+  .post-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .post-list li {
+    padding: 2rem 0;
+    border-bottom: 1px solid var(--c-rule);
+  }
+  .post-list li:last-child {
+    border-bottom: 0;
+  }
+  .post-list h2 {
+    margin: 0 0 0.25rem;
+    font-size: 1.5rem;
+  }
+  .post-list h2 a {
+    text-decoration: none;
+  }
+  .post-list h2 a:hover {
+    text-decoration: underline;
+  }
+  .meta {
+    color: var(--c-muted);
+    font-size: 0.875rem;
+    font-style: italic;
+    margin: 0 0 0.5rem;
+  }
+  .empty {
+    color: var(--c-muted);
+    font-style: italic;
+  }
+</style>

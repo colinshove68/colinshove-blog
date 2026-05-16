@@ -1,0 +1,36 @@
+---
+// Base layout for non-post pages (home, about, contact, blog index).
+
+import SEO from '../components/SEO.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  ogImage?: string;
+  breadcrumbs?: { label: string; href: string }[];
+}
+
+const { title, description, ogImage, breadcrumbs } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <SEO
+      title={title}
+      description={description}
+      ogImage={ogImage}
+      breadcrumbs={breadcrumbs}
+    />
+  </head>
+  <body>
+    <Header />
+    <main>
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

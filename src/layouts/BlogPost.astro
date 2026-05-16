@@ -1,0 +1,142 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import SEO from '../components/SEO.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import '../styles/global.css';
+
+type Props = CollectionEntry<'blog'>['data'] & {
+  readingTime?: string;
+};
+
+const {
+  title,
+  seoTitle,
+  metaDescription,
+  slug,
+  publishDate,
+  updatedDate,
+  author,
+  heroImage,
+  heroImageAlt,
+  primaryKeyword,
+  secondaryKeywords,
+  readingTime,
+} = Astro.props;
+
+const trail = [
+  { label: 'Home', href: '/' },
+  { label: 'Writing', href: '/blog' },
+  { label: title, href: `/blog/${slug}` },
+];
+
+const fmtDate = (d: Date) =>
+  d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+---
+
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <SEO
+      title={seoTitle}
+      description={metaDescription}
+      canonical={`/blog/${slug}/`}
+      ogImage={heroImage.src}
+      ogImageAlt={heroImageAlt}
+      type="article"
+      publishDate={publishDate}
+      updatedDate={updatedDate}
+      author={author}
+      primaryKeyword={primaryKeyword}
+      secondaryKeywords={secondaryKeywords}
+      breadcrumbs={trail}
+    />
+  </head>
+  <body>
+    <Header />
+
+    <main>
+      <article>
+        <div class="measure">
+          <Breadcrumbs trail={trail} />
+
+          <header class="post-head">
+            <h1>{title}</h1>
+            <p class="byline">
+              By {author} ·
+              <time datetime={publishDate.toISOString()}>{fmtDate(publishDate)}</time>
+              {updatedDate && (
+                <>
+                  {' '}· Updated <time datetime={updatedDate.toISOString()}>{fmtDate(updatedDate)}</time>
+                </>
+              )}
+              {readingTime && <> · {readingTime}</>}
+            </p>
+          </header>
+        </div>
+
+        {
+          heroImage && (
+            <figure class="hero">
+              <div class="measure-wide">
+                <img
+                  src={heroImage.src}
+                  width={heroImage.width}
+                  height={heroImage.height}
+                  alt={heroImageAlt}
+                  loading="eager"
+                  decoding="async"
+                />
+              </div>
+            </figure>
+          )
+        }
+
+        <div class="measure post-body">
+          <slot />
+        </div>
+
+        <div class="measure">
+          <hr />
+          <p class="post-meta">
+            Filed under <em>{primaryKeyword}</em>. If this resonated, the
+            <a href="/blog">writing index</a> has more like it.
+          </p>
+        </div>
+      </article>
+    </main>
+
+    <Footer />
+
+    <style>
+      .post-head {
+        margin: 1.5rem 0 2rem;
+      }
+      .byline {
+        color: var(--c-muted);
+        font-size: 0.9375rem;
+        font-style: italic;
+        margin: 0.5rem 0 0;
+      }
+      .hero {
+        margin: 2rem 0;
+      }
+      .hero img {
+        width: 100%;
+        height: auto;
+        border-radius: 2px;
+      }
+      .post-body :global(p),
+      .post-body :global(ul),
+      .post-body :global(ol) {
+        margin-bottom: 1.25rem;
+      }
+      .post-meta {
+        color: var(--c-muted);
+        font-size: 0.9375rem;
+        font-style: italic;
+      }
+    </style>
+  </body>
+</html>
