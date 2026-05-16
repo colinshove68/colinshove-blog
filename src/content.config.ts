@@ -5,6 +5,13 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
+const audienceSlug = z.enum([
+  'local-businesses',
+  'professional-services',
+  'trades',
+  'salons',
+]);
+
 const blog = defineCollection({
   loader: glob({ base: './src/content/blog', pattern: '**/*.{md,mdx}' }),
   schema: ({ image }) =>
@@ -42,16 +49,27 @@ const blog = defineCollection({
       heroImage: image(),
       heroImageAlt: z.string().min(5),
 
-      // Optional categorisation
-      category: z
-        .enum([
-          'performance',
-          'commentary',
-          'essays',
-          'tutorials',
-        ])
-        .optional(),
+      // Audience targeting (drives the homepage filter)
+      // At least one required. Use all four if the post is genuinely for everyone.
+      audiences: z.array(audienceSlug).min(1),
+
+      // Optional freeform tags for cross-cutting topics
       tags: z.array(z.string()).default([]),
+
+      // Optional downloadable assets (PDFs, DOCX, XLSX, ZIP, audio).
+      // Each download is gated by an email form before the link reveals.
+      downloads: z
+        .array(
+          z.object({
+            id: z.string().regex(/^[a-z0-9-]+$/, 'download id must be kebab-case'),
+            label: z.string(),
+            description: z.string().optional(),
+            file: z.string().startsWith('/'), // e.g. "/downloads/your-file.pdf"
+            fileType: z.string().optional(), // "PDF", "DOCX", etc. Auto-derived if missing.
+            size: z.string().optional(), // "2.4 MB"
+          })
+        )
+        .default([]),
 
       // Set true to hide from listings (useful for drafts you want deployed but not surfaced)
       draft: z.boolean().default(false),

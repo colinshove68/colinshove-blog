@@ -1,0 +1,261 @@
+---
+// Email-gated downloads. Reader submits name + email, the form posts to Zapier,
+// and the direct download link is revealed on the page. Zapier should also
+// email them a copy of the link for their records.
+
+import { ZAPIER_WEBHOOK_URL } from '../consts';
+
+interface Download {
+  id: string;
+  label: string;
+  description?: string;
+  file: string;
+  fileType?: string;
+  size?: string;
+}
+
+interface Props {
+  downloads: Download[];
+  postSlug: string;
+}
+
+const { downloads, postSlug } = Astro.props;
+
+function deriveType(d: Download): string {
+  if (d.fileType) return d.fileType;
+  const ext = d.file.split('.').pop()?.toUpperCase() ?? '';
+  return ext;
+}
+---
+
+{
+  downloads.length > 0 && (
+    <section class="downloads" aria-label="Downloads">
+      <h2>Free download{downloads.length > 1 ? 's' : ''}</h2>
+      <p class="intro">
+        Enter your name and email to get the {downloads.length > 1 ? 'files' : 'file'} below.
+        You will also receive a copy of the link by email.
+      </p>
+
+      <ul class="files">
+        {downloads.map((d) => (
+          <li class="file" data-download-id={d.id}>
+            <div class="file-meta">
+              <h3>{d.label}</h3>
+              {d.description && <p class="desc">{d.description}</p>}
+              <p class="info">
+                <span class="type">{deriveType(d)}</span>
+                {d.size && <> · {d.size}</>}
+              </p>
+            </div>
+
+            <form class="gate-form" data-file={d.file} data-id={d.id} data-post={postSlug} novalidate>
+              <input type="hidden" name="type" value="download" />
+              <input type="hidden" name="download_id" value={d.id} />
+              <input type="hidden" name="download_label" value={d.label} />
+              <input type="hidden" name="download_file" value={d.file} />
+              <input type="hidden" name="source_post" value={postSlug} />
+
+              <input
+                type="text"
+                name="company"
+                tabindex="-1"
+                autocomplete="off"
+                class="honeypot"
+                aria-hidden="true"
+              />
+
+              <div class="fields">
+                <label class="field">
+                  <span>Name</span>
+                  <input type="text" name="name" required autocomplete="given-name" />
+                </label>
+                <label class="field">
+                  <span>Email</span>
+                  <input type="email" name="email" required autocomplete="email" />
+                </label>
+              </div>
+
+              <button type="submit">Get the download</button>
+              <p class="status" role="status" aria-live="polite" />
+
+              <a class="reveal" href={d.file} target="_blank" rel="noopener" hidden>
+                Download now &rarr;
+              </a>
+            </form>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+<script define:vars={{ ZAPIER_WEBHOOK_URL }}>
+  document.querySelectorAll('.downloads .gate-form').forEach((form) => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const status = form.querySelector('.status');
+      const button = form.querySelector('button');
+      const reveal = form.querySelector('.reveal');
+
+      const fd = new FormData(form);
+      if (fd.get('company')) {
+        status.textContent = 'Thanks.';
+        return;
+      }
+
+      if (!ZAPIER_WEBHOOK_URL || ZAPIER_WEBHOOK_URL.includes('REPLACE')) {
+        status.textContent =
+          'Downloads are being set up. Please try again shortly.';
+        status.className = 'status err';
+        return;
+      }
+
+      button.disabled = true;
+      status.textContent = 'Sending...';
+      status.className = 'status';
+
+      try {
+        await fetch(ZAPIER_WEBHOOK_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(Object.fromEntries(fd)),
+        });
+        status.textContent =
+          'Thanks. Your download is ready below, and we have also emailed you the link.';
+        status.className = 'status ok';
+        reveal.removeAttribute('hidden');
+      } catch (err) {
+        status.textContent = 'Something went wrong. Please try again.';
+        status.className = 'status err';
+      } finally {
+        button.disabled = false;
+      }
+    });
+  });
+</script>
+
+<style>
+  .downloads {
+    margin: 3rem 0;
+    padding: 2rem 1.5rem;
+    background: var(--c-bg-alt);
+    border-radius: 4px;
+  }
+  .downloads h2 {
+    margin: 0 0 0.5rem;
+  }
+  .intro {
+    color: var(--c-muted);
+    margin: 0 0 1.5rem;
+  }
+  .files {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .file {
+    padding: 1.25rem;
+    background: var(--c-bg);
+    border: 1px solid var(--c-rule);
+    border-radius: 3px;
+  }
+  .file h3 {
+    margin: 0 0 0.25rem;
+    font-size: 1.125rem;
+  }
+  .desc {
+    margin: 0 0 0.5rem;
+    color: var(--c-ink);
+  }
+  .info {
+    margin: 0 0 1rem;
+    color: var(--c-muted);
+    font-size: 0.85rem;
+  }
+  .type {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  @media (max-width: 480px) {
+    .fields {
+      grid-template-columns: 1fr;
+    }
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.875rem;
+    color: var(--c-muted);
+  }
+  .field span {
+    margin-bottom: 0.25rem;
+  }
+  input[type='text'],
+  input[type='email'] {
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--c-bg);
+    border: 1px solid var(--c-rule);
+    border-radius: 3px;
+    color: var(--c-ink);
+  }
+  input:focus-visible {
+    outline: 2px solid var(--c-accent);
+    outline-offset: 1px;
+  }
+  button {
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    padding: 0.6rem 1.5rem;
+    background: var(--c-ink);
+    color: var(--c-bg);
+    border: 0;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  button:hover {
+    background: var(--c-accent);
+  }
+  button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .status {
+    margin: 0.75rem 0 0;
+    font-size: 0.875rem;
+    min-height: 1.25rem;
+  }
+  .status.ok {
+    color: var(--c-ink);
+  }
+  .status.err {
+    color: #b00020;
+  }
+  .reveal {
+    display: inline-block;
+    margin-top: 0.75rem;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    color: var(--c-accent);
+  }
+  .honeypot {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+</style>

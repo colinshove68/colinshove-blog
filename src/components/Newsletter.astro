@@ -1,0 +1,193 @@
+---
+// Newsletter signup form. Posts name + email to a Zapier webhook.
+// Set ZAPIER_WEBHOOK_URL in src/consts.ts before this will work.
+
+import { ZAPIER_WEBHOOK_URL } from '../consts';
+
+interface Props {
+  heading?: string;
+  blurb?: string;
+  source?: string; // tags the submission so you can see where it came from in the Sheet
+}
+
+const {
+  heading = 'Subscribe',
+  blurb = 'New posts straight to your inbox. No spam, unsubscribe any time.',
+  source = 'general',
+} = Astro.props;
+---
+
+<section class="newsletter" data-source={source}>
+  <div class="inner">
+    <h3>{heading}</h3>
+    <p>{blurb}</p>
+
+    <form class="signup-form" novalidate>
+      <input type="hidden" name="type" value="newsletter" />
+      <input type="hidden" name="source" value={source} />
+
+      <!-- Honeypot. Real users will not fill this. Bots will. -->
+      <input
+        type="text"
+        name="company"
+        tabindex="-1"
+        autocomplete="off"
+        class="honeypot"
+        aria-hidden="true"
+      />
+
+      <div class="fields">
+        <label class="field">
+          <span>Name</span>
+          <input type="text" name="name" required autocomplete="given-name" />
+        </label>
+
+        <label class="field">
+          <span>Email</span>
+          <input type="email" name="email" required autocomplete="email" />
+        </label>
+      </div>
+
+      <button type="submit">Subscribe</button>
+
+      <p class="status" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</section>
+
+<script define:vars={{ ZAPIER_WEBHOOK_URL }}>
+  document.querySelectorAll('.newsletter .signup-form').forEach((form) => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const status = form.querySelector('.status');
+      const button = form.querySelector('button');
+
+      const fd = new FormData(form);
+      // Drop honeypot
+      if (fd.get('company')) {
+        status.textContent = 'Thanks.';
+        form.reset();
+        return;
+      }
+
+      if (!ZAPIER_WEBHOOK_URL || ZAPIER_WEBHOOK_URL.includes('REPLACE')) {
+        status.textContent =
+          'Signup is being set up. Please try again shortly.';
+        status.className = 'status err';
+        return;
+      }
+
+      button.disabled = true;
+      status.textContent = 'Sending...';
+      status.className = 'status';
+
+      try {
+        await fetch(ZAPIER_WEBHOOK_URL, {
+          method: 'POST',
+          mode: 'no-cors', // Zapier accepts this; we cannot read the response, which is fine
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(Object.fromEntries(fd)),
+        });
+        status.textContent = 'Thanks. Check your inbox to confirm.';
+        status.className = 'status ok';
+        form.reset();
+      } catch (err) {
+        status.textContent = 'Something went wrong. Please try again.';
+        status.className = 'status err';
+      } finally {
+        button.disabled = false;
+      }
+    });
+  });
+</script>
+
+<style>
+  .newsletter {
+    margin: 3rem 0;
+    padding: 2rem 1.5rem;
+    background: var(--c-bg-alt);
+    border-radius: 4px;
+  }
+  .inner {
+    max-width: 32rem;
+    margin: 0 auto;
+  }
+  h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.5rem;
+  }
+  p {
+    margin: 0 0 1.25rem;
+    color: var(--c-muted);
+    font-size: 0.95rem;
+  }
+  .fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  @media (max-width: 480px) {
+    .fields {
+      grid-template-columns: 1fr;
+    }
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.875rem;
+    color: var(--c-muted);
+  }
+  .field span {
+    margin-bottom: 0.25rem;
+  }
+  input[type='text'],
+  input[type='email'] {
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--c-bg);
+    border: 1px solid var(--c-rule);
+    border-radius: 3px;
+    color: var(--c-ink);
+  }
+  input:focus-visible {
+    outline: 2px solid var(--c-accent);
+    outline-offset: 1px;
+  }
+  button {
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    padding: 0.6rem 1.5rem;
+    background: var(--c-ink);
+    color: var(--c-bg);
+    border: 0;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  button:hover {
+    background: var(--c-accent);
+  }
+  button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .status {
+    margin: 0.75rem 0 0;
+    font-size: 0.875rem;
+    min-height: 1.25rem;
+  }
+  .status.ok {
+    color: var(--c-ink);
+  }
+  .status.err {
+    color: #b00020;
+  }
+  .honeypot {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+</style>

@@ -1,48 +1,74 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import Newsletter from '../components/Newsletter.astro';
+import { SITE_TITLE, SITE_TAGLINE, SITE_DESCRIPTION, AUDIENCES } from '../consts';
 
-const posts = (await getCollection('blog', ({ data }) => !data.draft))
-  .sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf())
-  .slice(0, 6);
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf()
+);
 
 const fmt = (d: Date) =>
   d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+const audienceLabel: Record<string, string> = Object.fromEntries(
+  AUDIENCES.map((a) => [a.slug, a.label])
+);
 ---
 
 <Base title={SITE_TITLE} description={SITE_DESCRIPTION}>
-  <section class="measure intro">
-    <h1>Colin Shove</h1>
-    <p class="lede">
-      Web designer and developer. I run <a href="https://frively.com">Frively</a>,
-      building high-performance sites for local businesses. This is where I write
-      about the craft, the industry, and the occasional tangent.
-    </p>
-    <p>
-      <a href="/blog">Read the writing</a> ·
-      <a href="/about">About me</a> ·
-      <a href="/contact">Get in touch</a>
-    </p>
+  <section class="hero">
+    <div class="measure">
+      <h1>{SITE_TITLE}</h1>
+      <p class="tagline">{SITE_TAGLINE}</p>
+    </div>
   </section>
 
-  <section class="measure">
-    <h2>Recent writing</h2>
+  <section class="filter measure" aria-label="Filter posts by audience">
+    <div class="filter-bar" role="tablist">
+      <button type="button" class="pill active" data-filter="all" role="tab" aria-selected="true">
+        All
+      </button>
+      {
+        AUDIENCES.map((a) => (
+          <button
+            type="button"
+            class="pill"
+            data-filter={a.slug}
+            role="tab"
+            aria-selected="false"
+          >
+            {a.label}
+          </button>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="posts measure">
     {
       posts.length === 0 ? (
         <p class="empty">First post is on the way. Check back soon.</p>
       ) : (
         <ul class="post-list">
           {posts.map((post) => (
-            <li>
+            <li data-audiences={post.data.audiences.join(' ')}>
               <article>
-                <h3>
+                <h2>
                   <a href={`/blog/${post.data.slug}/`}>{post.data.title}</a>
-                </h3>
+                </h2>
                 <p class="meta">
                   <time datetime={post.data.publishDate.toISOString()}>
                     {fmt(post.data.publishDate)}
                   </time>
+                  {post.data.audiences.length > 0 && (
+                    <>
+                      {' · '}
+                      <span class="audiences">
+                        {post.data.audiences.map((a) => audienceLabel[a]).join(', ')}
+                      </span>
+                    </>
+                  )}
                 </p>
                 <p>{post.data.metaDescription}</p>
               </article>
@@ -51,20 +77,91 @@ const fmt = (d: Date) =>
         </ul>
       )
     }
+    <p class="empty-filter" hidden>
+      No posts in this audience yet. Try another, or check back soon.
+    </p>
   </section>
+
+  <div class="measure">
+    <Newsletter source="homepage" />
+  </div>
 </Base>
 
+<script>
+  const pills = document.querySelectorAll<HTMLButtonElement>('.filter .pill');
+  const items = document.querySelectorAll<HTMLLIElement>('.post-list li');
+  const empty = document.querySelector<HTMLElement>('.empty-filter');
+
+  pills.forEach((pill) => {
+    pill.addEventListener('click', () => {
+      const filter = pill.dataset.filter || 'all';
+      pills.forEach((p) => {
+        p.classList.toggle('active', p === pill);
+        p.setAttribute('aria-selected', p === pill ? 'true' : 'false');
+      });
+
+      let visible = 0;
+      items.forEach((li) => {
+        const audiences = (li.dataset.audiences || '').split(' ');
+        const show = filter === 'all' || audiences.includes(filter);
+        li.hidden = !show;
+        if (show) visible++;
+      });
+
+      if (empty) empty.hidden = visible !== 0;
+    });
+  });
+</script>
+
 <style>
-  .intro {
-    padding: 1rem 1.25rem 2rem;
+  .hero {
+    padding: 3rem 0 1.5rem;
+    border-bottom: 1px solid var(--c-rule);
+    margin-bottom: 2rem;
   }
-  .intro h1 {
-    margin-bottom: 1rem;
+  .hero h1 {
+    margin: 0 0 1rem;
+    font-size: clamp(2.25rem, 5vw, 3.25rem);
   }
-  .lede {
-    font-size: 1.1875rem;
-    line-height: 1.6;
+  .tagline {
+    font-size: clamp(1.125rem, 2vw, 1.375rem);
+    line-height: 1.5;
+    color: var(--c-muted);
+    margin: 0;
+  }
+  .filter {
+    margin-bottom: 1.5rem;
+  }
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .pill {
+    font-family: var(--font-serif);
+    font-size: 0.9375rem;
+    padding: 0.4rem 0.9rem;
+    background: var(--c-bg);
+    color: var(--c-muted);
+    border: 1px solid var(--c-rule);
+    border-radius: 999px;
+    cursor: pointer;
+    transition:
+      background 120ms,
+      color 120ms,
+      border-color 120ms;
+  }
+  .pill:hover {
     color: var(--c-ink);
+    border-color: var(--c-ink);
+  }
+  .pill.active {
+    background: var(--c-ink);
+    color: var(--c-bg);
+    border-color: var(--c-ink);
+  }
+  .posts {
+    padding-bottom: 2rem;
   }
   .post-list {
     list-style: none;
@@ -72,20 +169,20 @@ const fmt = (d: Date) =>
     margin: 0;
   }
   .post-list li {
-    padding: 1.5rem 0;
+    padding: 2rem 0;
     border-bottom: 1px solid var(--c-rule);
   }
   .post-list li:last-child {
     border-bottom: 0;
   }
-  .post-list h3 {
+  .post-list h2 {
     margin: 0 0 0.25rem;
-    font-size: 1.25rem;
+    font-size: 1.5rem;
   }
-  .post-list h3 a {
+  .post-list h2 a {
     text-decoration: none;
   }
-  .post-list h3 a:hover {
+  .post-list h2 a:hover {
     text-decoration: underline;
   }
   .meta {
@@ -94,8 +191,14 @@ const fmt = (d: Date) =>
     font-style: italic;
     margin: 0 0 0.5rem;
   }
-  .empty {
+  .audiences {
+    font-style: normal;
+  }
+  .empty,
+  .empty-filter {
     color: var(--c-muted);
     font-style: italic;
+    text-align: center;
+    padding: 2rem 0;
   }
 </style>

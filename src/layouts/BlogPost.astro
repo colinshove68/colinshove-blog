@@ -4,6 +4,11 @@ import SEO from '../components/SEO.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Share from '../components/Share.astro';
+import Newsletter from '../components/Newsletter.astro';
+import Downloads from '../components/Downloads.astro';
+import Comments from '../components/Comments.astro';
+import { AUDIENCES } from '../consts';
 import '../styles/global.css';
 
 type Props = CollectionEntry<'blog'>['data'] & {
@@ -22,17 +27,22 @@ const {
   heroImageAlt,
   primaryKeyword,
   secondaryKeywords,
+  audiences,
+  downloads,
   readingTime,
 } = Astro.props;
 
 const trail = [
   { label: 'Home', href: '/' },
-  { label: 'Writing', href: '/blog' },
   { label: title, href: `/blog/${slug}` },
 ];
 
 const fmtDate = (d: Date) =>
   d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+const audienceLabel: Record<string, string> = Object.fromEntries(
+  AUDIENCES.map((a) => [a.slug, a.label])
+);
 ---
 
 <!doctype html>
@@ -73,6 +83,11 @@ const fmtDate = (d: Date) =>
               )}
               {readingTime && <> · {readingTime}</>}
             </p>
+            {audiences.length > 0 && (
+              <p class="audiences">
+                For: {audiences.map((a) => audienceLabel[a]).join(', ')}
+              </p>
+            )}
           </header>
         </div>
 
@@ -98,11 +113,14 @@ const fmtDate = (d: Date) =>
         </div>
 
         <div class="measure">
-          <hr />
-          <p class="post-meta">
-            Filed under <em>{primaryKeyword}</em>. If this resonated, the
-            <a href="/blog">writing index</a> has more like it.
-          </p>
+          <Downloads downloads={downloads} postSlug={slug} />
+          <Share title={title} url={`/blog/${slug}/`} />
+          <Newsletter
+            heading="Get more like this"
+            blurb="Posts straight to your inbox when they go live. No spam."
+            source={`post:${slug}`}
+          />
+          <Comments />
         </div>
       </article>
     </main>
@@ -119,6 +137,13 @@ const fmtDate = (d: Date) =>
         font-style: italic;
         margin: 0.5rem 0 0;
       }
+      .audiences {
+        color: var(--c-muted);
+        font-size: 0.875rem;
+        margin: 0.5rem 0 0;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
       .hero {
         margin: 2rem 0;
       }
@@ -131,11 +156,6 @@ const fmtDate = (d: Date) =>
       .post-body :global(ul),
       .post-body :global(ol) {
         margin-bottom: 1.25rem;
-      }
-      .post-meta {
-        color: var(--c-muted);
-        font-size: 0.9375rem;
-        font-style: italic;
       }
     </style>
   </body>

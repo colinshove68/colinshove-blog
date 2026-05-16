@@ -1,0 +1,101 @@
+---
+// Social share buttons. Pure URL-based, no third-party scripts, no tracking.
+
+import { SITE_URL } from '../consts';
+
+interface Props {
+  title: string;
+  url: string; // path, like "/blog/your-post/"
+}
+
+const { title, url } = Astro.props;
+const fullUrl = new URL(url, SITE_URL).toString();
+const encUrl = encodeURIComponent(fullUrl);
+const encTitle = encodeURIComponent(title);
+
+const linkedin = `https://www.linkedin.com/sharing/share-offsite/?url=${encUrl}`;
+const x = `https://x.com/intent/post?url=${encUrl}&text=${encTitle}`;
+const facebook = `https://www.facebook.com/sharer/sharer.php?u=${encUrl}`;
+const mailto = `mailto:?subject=${encTitle}&body=${encUrl}`;
+---
+
+<aside class="share" aria-label="Share this post">
+  <span class="label">Share</span>
+  <ul>
+    <li>
+      <a href={linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+    </li>
+    <li>
+      <a href={x} target="_blank" rel="noopener noreferrer">X</a>
+    </li>
+    <li>
+      <a href={facebook} target="_blank" rel="noopener noreferrer">Facebook</a>
+    </li>
+    <li>
+      <a href={mailto}>Email</a>
+    </li>
+    <li>
+      <button type="button" class="copy" data-url={fullUrl}>Copy link</button>
+    </li>
+  </ul>
+</aside>
+
+<script>
+  document.querySelectorAll('.share .copy').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const url = btn.getAttribute('data-url') || '';
+      try {
+        await navigator.clipboard.writeText(url);
+        const original = btn.textContent;
+        btn.textContent = 'Copied';
+        setTimeout(() => {
+          btn.textContent = original;
+        }, 1500);
+      } catch {
+        btn.textContent = 'Copy failed';
+      }
+    });
+  });
+</script>
+
+<style>
+  .share {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 2rem 0;
+    padding: 1rem 0;
+    border-top: 1px solid var(--c-rule);
+    border-bottom: 1px solid var(--c-rule);
+    font-size: 0.875rem;
+  }
+  .label {
+    color: var(--c-muted);
+    font-style: italic;
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  a,
+  button {
+    color: var(--c-ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: var(--c-rule);
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+  }
+  a:hover,
+  button:hover {
+    text-decoration-color: var(--c-accent);
+  }
+</style>
