@@ -1,43 +1,38 @@
 ---
-// Giscus comments component. Loads from giscus.app, uses GitHub Discussions
-// as the backend. Free, no tracking, no ads.
+// HyvorTalk comments. No login required for readers. They type
+// a name, email, and message. Free up to 5k page views per month.
 //
 // Setup:
-// 1. Enable Discussions on your repo (Settings > General > scroll to Features)
-// 2. Install the giscus app: https://github.com/apps/giscus
-// 3. Visit https://giscus.app to generate config values
-// 4. Paste those values into src/consts.ts under the GISCUS export
-// 5. Set GISCUS.enabled = true
+// 1. Sign up at https://talk.hyvor.com/
+// 2. Add colinshove.com as a Website. Note the numeric Website ID.
+// 3. In src/consts.ts under HYVORTALK, set enabled: true and paste
+//    the websiteId.
 
-import { GISCUS } from '../consts';
+import { HYVORTALK } from '../consts';
 
-const { enabled, repo, repoId, category, categoryId, mapping, reactionsEnabled, emitMetadata, inputPosition, theme, lang } = GISCUS;
+interface Props {
+  pageId: string;
+}
+
+const { pageId } = Astro.props;
+const { enabled, websiteId } = HYVORTALK;
+const isConfigured =
+  enabled && websiteId && !websiteId.includes('REPLACE');
 ---
 
 {
-  enabled && (
+  isConfigured && (
     <section class="comments" aria-label="Comments">
       <h2>Comments</h2>
       <p class="note">
-        Comments are powered by GitHub Discussions. A GitHub account is needed
-        to reply, which keeps the conversation civil and spam-free.
+        Type your name, email, and message. No account needed.
       </p>
       <script
-        src="https://giscus.app/client.js"
-        data-repo={repo}
-        data-repo-id={repoId}
-        data-category={category}
-        data-category-id={categoryId}
-        data-mapping={mapping}
-        data-strict="0"
-        data-reactions-enabled={reactionsEnabled}
-        data-emit-metadata={emitMetadata}
-        data-input-position={inputPosition}
-        data-theme={theme}
-        data-lang={lang}
-        crossorigin="anonymous"
         async
+        type="module"
+        src="https://talk.hyvor.com/embed/embed.js"
       />
+      <hyvor-talk-comments website-id={websiteId} page-id={pageId} />
     </section>
   )
 }

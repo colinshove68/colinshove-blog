@@ -120,7 +120,7 @@ const audienceLabel: Record<string, string> = Object.fromEntries(
             blurb="Posts straight to your inbox when they go live. No spam."
             source={`post:${slug}`}
           />
-          <Comments />
+          <Comments pageId={slug} />
         </div>
       </article>
     </main>

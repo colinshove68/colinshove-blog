@@ -34,17 +34,11 @@ export type AudienceSlug = (typeof AUDIENCES)[number]['slug'];
 export const ZAPIER_WEBHOOK_URL =
   'https://hooks.zapier.com/hooks/catch/8754155/4obb9h6/';
 
-// Giscus configuration for comments.
-export const GISCUS = {
+// HyvorTalk configuration for comments.
+// Sign up at https://talk.hyvor.com/, add colinshove.com as a website,
+// then paste your numeric Website ID here. Free tier supports up to
+// 5,000 page views per month.
+export const HYVORTALK = {
   enabled: true,
-  repo: 'colinshove68/colinshove-blog',
-  repoId: 'R_kgDOSfUi4w',
-  category: 'Announcements',
-  categoryId: 'DIC_kwDOSfUi484C9Mhn',
-  mapping: 'pathname' as const,
-  reactionsEnabled: '1',
-  emitMetadata: '0',
-  inputPosition: 'bottom' as 'top' | 'bottom',
-  theme: 'preferred_color_scheme',
-  lang: 'en',
+  websiteId: '15426',
 };
