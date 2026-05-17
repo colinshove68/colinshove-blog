@@ -1,10 +1,10 @@
 // Site-wide constants. Edit here and they update everywhere.
 
-export const SITE_TITLE = "Colin's Blog";
+export const SITE_TITLE = "Colin Shove's Blog";
 export const SITE_TAGLINE =
-  'Simple ideas to make small to medium sized businesses perform better.';
+  'Ideas to help small businesses perform better. Personal blog, no affiliation, no products to sell.';
 export const SITE_DESCRIPTION =
-  "Colin's Blog. Simple ideas to make small to medium sized businesses perform better. Written for local businesses, professional services, trades, and salons.";
+  'Ideas to help small businesses perform better. Personal blog, no affiliation, no products to sell.';
 export const SITE_URL = 'https://colinshove.com';
 
 export const AUTHOR = {

@@ -11,9 +11,10 @@ interface Props {
   description: string;
   ogImage?: string;
   breadcrumbs?: { label: string; href: string }[];
+  appendSiteTitle?: boolean;
 }
 
-const { title, description, ogImage, breadcrumbs } = Astro.props;
+const { title, description, ogImage, breadcrumbs, appendSiteTitle = true } = Astro.props;
 ---
 
 <!doctype html>
@@ -24,6 +25,7 @@ const { title, description, ogImage, breadcrumbs } = Astro.props;
       description={description}
       ogImage={ogImage}
       breadcrumbs={breadcrumbs}
+      appendSiteTitle={appendSiteTitle}
     />
   </head>
   <body>

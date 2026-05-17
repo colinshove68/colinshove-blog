@@ -23,10 +23,14 @@ const audienceLabel: Record<string, string> = Object.fromEntries(
 );
 ---
 
-<Base title={SITE_TITLE} description={SITE_DESCRIPTION}>
+<Base
+  title="Colin Shove's Blog. Ideas for small businesses."
+  description="Ideas to help small businesses perform better. Personal blog, no affiliation, no products to sell."
+  appendSiteTitle={false}
+>
   <section class="hero">
     <div class="measure">
-      <h1>{SITE_TITLE}</h1>
+      <h1>Colin Shove's Blog</h1>
       <p class="tagline">{SITE_TAGLINE}</p>
     </div>
   </section>
