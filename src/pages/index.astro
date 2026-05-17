@@ -6,7 +6,13 @@ import Newsletter from '../components/Newsletter.astro';
 import { SITE_TITLE, SITE_TAGLINE, SITE_DESCRIPTION, AUDIENCES } from '../consts';
 
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
-  (a, b) => a.data.publishDate.valueOf() - b.data.publishDate.valueOf()
+  (a, b) => {
+    // Pinned posts always come first
+    if (a.data.pinned && !b.data.pinned) return -1;
+    if (!a.data.pinned && b.data.pinned) return 1;
+    // Otherwise newest first
+    return b.data.publishDate.valueOf() - a.data.publishDate.valueOf();
+  }
 );
 
 const fmt = (d: Date) =>

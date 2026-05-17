@@ -73,6 +73,10 @@ const blog = defineCollection({
 
       // Set true to hide from listings (useful for drafts you want deployed but not surfaced)
       draft: z.boolean().default(false),
+
+      // Set true to keep this post pinned to the top of the homepage,
+      // above all newer posts. Use sparingly: welcome posts, important notices.
+      pinned: z.boolean().default(false),
     }),
 });
 
